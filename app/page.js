@@ -38,10 +38,22 @@ export default function Home() {
 
   const latest = checkins[0];
 
-  function formatDate(ts) {
+  function formatDate(ts, tz) {
     if (!ts) return "...";
     const d = new Date(ts);
-    return d.toLocaleDateString("en-US", {month:"short", day:"numeric"}) + " · " + d.toLocaleTimeString("en-US", {hour:"2-digit", minute:"2-digit"});
+    const myTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const parentTz = tz || profile.parentTimezone || "Asia/Seoul";
+    const myTime = d.toLocaleString("en-US", {
+      timeZone: myTz,
+      month:"short", day:"numeric",
+      hour:"2-digit", minute:"2-digit"
+    });
+    const parentTime = d.toLocaleString("en-US", {
+      timeZone: parentTz,
+      month:"short", day:"numeric",
+      hour:"2-digit", minute:"2-digit"
+    });
+  return `${myTime} (${profile.myName}) · ${parentTime} (${profile.parentName})`;
   }
 
   return (
@@ -50,17 +62,24 @@ export default function Home() {
         <h1 style={{fontSize:"22px", fontWeight:"500"}}>Senior Dashboard</h1>
         <button onClick={() => signOut(auth)} style={{fontSize:"12px", color:"#888", background:"none", border:"none", cursor:"pointer"}}>Sign out</button>
       </div>
-      <p style={{color:"#888", fontSize:"14px", marginBottom:"24px"}}>
-        Hi {profile.myName} · Monitoring {profile.parentName}
-      </p>
+<p style={{color:"#888", fontSize:"14px", marginBottom:"24px"}}>
+  Hi {profile.myName} · Monitoring{" "}
+  <span
+    onClick={() => router.push("/setup")}
+    style={{color:"#1D9E75", cursor:"pointer", textDecoration:"underline"}}
+  >
+    {profile.parentName}
+  </span>
+</p>
 
       <div style={{background:"#E1F5EE", borderRadius:"12px", padding:"20px", marginBottom:"12px"}}>
         <div style={{fontSize:"12px", color:"#0F6E56", marginBottom:"4px"}}>STATUS</div>
         <div style={{fontSize:"24px", fontWeight:"500", color:"#085041"}}>
           {latest ? "✓ " + latest.status : "No check-ins yet"}
         </div>
-        <div style={{fontSize:"13px", color:"#1D9E75", marginTop:"4px"}}>
-          Last check-in: {latest ? formatDate(latest.createdAt) : "..."}
+        <div style={{fontSize:"11px", color:"#1D9E75", marginTop:"6px", lineHeight:"1.6"}}>
+          Last check-in:<br/>
+          {latest ? formatDate(latest.createdAt, latest.timezone) : "..."}
         </div>
       </div>
 
@@ -69,19 +88,19 @@ export default function Home() {
         {checkins.length === 0 && <div style={{fontSize:"13px", color:"#aaa"}}>No check-ins yet</div>}
         {checkins.map((c, i) => (
           <div key={c.id} style={{
-            display:"flex", justifyContent:"space-between", alignItems:"center",
-            padding:"8px 0",
+            display:"flex", justifyContent:"space-between", alignItems:"flex-start",
+            padding:"10px 0",
             borderBottom: i < checkins.length - 1 ? "1px solid #e5e5e5" : "none"
           }}>
             <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-              <div style={{width:"8px", height:"8px", borderRadius:"50%", background:"#1D9E75", flexShrink:0}}></div>
+              <div style={{width:"8px", height:"8px", borderRadius:"50%", background:"#1D9E75", flexShrink:0, marginTop:"4px"}}></div>
               <div>
                 <div style={{fontSize:"13px", fontWeight:"500", color:"#085041"}}>✓ {c.status}</div>
                 <div style={{fontSize:"11px", color:"#888"}}>{c.name}</div>
               </div>
             </div>
-            <div style={{fontSize:"11px", color:"#888", textAlign:"right"}}>
-              {formatDate(c.createdAt)}
+            <div style={{fontSize:"11px", color:"#888", textAlign:"right", lineHeight:"1.6"}}>
+              {formatDate(c.createdAt, c.timezone)}
             </div>
           </div>
         ))}

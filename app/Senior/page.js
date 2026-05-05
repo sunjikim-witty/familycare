@@ -7,11 +7,13 @@ export default function Senior() {
   const [done, setDone] = useState(false);
 
   async function handleCheckin() {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     await addDoc(collection(db, "checkins"), {
-      name: "Elaine Kim",
+      name: "Mom",
       status: "OK",
       time: new Date().toLocaleTimeString(),
       createdAt: Date.now(),
+      timezone: timezone,
     });
     setDone(true);
   }
