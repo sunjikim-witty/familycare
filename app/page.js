@@ -26,13 +26,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-    const q = query(collection(db, "checkins"), orderBy("createdAt", "desc"), limit(20));
+    if (!user || !profile) return;
+    const q = query(
+      collection(db, "families", profile.familyId, "checkins"),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setCheckins(snapshot.docs.map(d => ({id: d.id, ...d.data()})));
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, profile]);
 
   if (!user || !profile) return null;
 
@@ -44,16 +48,12 @@ export default function Home() {
     const myTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const parentTz = tz || profile.parentTimezone || "Asia/Seoul";
     const myTime = d.toLocaleString("en-US", {
-      timeZone: myTz,
-      month:"short", day:"numeric",
-      hour:"2-digit", minute:"2-digit"
+      timeZone: myTz, month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"
     });
     const parentTime = d.toLocaleString("en-US", {
-      timeZone: parentTz,
-      month:"short", day:"numeric",
-      hour:"2-digit", minute:"2-digit"
+      timeZone: parentTz, month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"
     });
-  return `${myTime} (${profile.myName}) · ${parentTime} (${profile.parentName})`;
+    return `${myTime} (${profile.myName}) · ${parentTime} (${profile.parentName})`;
   }
 
   return (
@@ -62,15 +62,12 @@ export default function Home() {
         <h1 style={{fontSize:"22px", fontWeight:"500"}}>Senior Dashboard</h1>
         <button onClick={() => signOut(auth)} style={{fontSize:"12px", color:"#888", background:"none", border:"none", cursor:"pointer"}}>Sign out</button>
       </div>
-<p style={{color:"#888", fontSize:"14px", marginBottom:"24px"}}>
-  Hi {profile.myName} · Monitoring{" "}
-  <span
-    onClick={() => router.push("/setup")}
-    style={{color:"#1D9E75", cursor:"pointer", textDecoration:"underline"}}
-  >
-    {profile.parentName}
-  </span>
-</p>
+      <p style={{color:"#888", fontSize:"14px", marginBottom:"24px"}}>
+        Hi {profile.myName} · Monitoring{" "}
+        <span onClick={() => router.push("/setup")} style={{color:"#1D9E75", cursor:"pointer", textDecoration:"underline"}}>
+          {profile.parentName}
+        </span>
+      </p>
 
       <div style={{background:"#E1F5EE", borderRadius:"12px", padding:"20px", marginBottom:"12px"}}>
         <div style={{fontSize:"12px", color:"#0F6E56", marginBottom:"4px"}}>STATUS</div>
@@ -81,6 +78,14 @@ export default function Home() {
           Last check-in:<br/>
           {latest ? formatDate(latest.createdAt, latest.timezone) : "..."}
         </div>
+      </div>
+
+      <div style={{background:"#E6F1FB", borderRadius:"12px", padding:"16px", marginBottom:"12px"}}>
+        <div style={{fontSize:"12px", color:"#888", marginBottom:"4px"}}>SENIOR LINK</div>
+        <div style={{fontSize:"12px", color:"#185FA5", wordBreak:"break-all"}}>
+          familycare-six.vercel.app/Senior/{profile.familyId}
+        </div>
+        <div style={{fontSize:"11px", color:"#888", marginTop:"4px"}}>Share this link with {profile.parentName}</div>
       </div>
 
       <div style={{background:"#f5f5f5", borderRadius:"12px", padding:"20px", marginBottom:"12px"}}>
@@ -94,10 +99,7 @@ export default function Home() {
           }}>
             <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
               <div style={{width:"8px", height:"8px", borderRadius:"50%", background:"#1D9E75", flexShrink:0, marginTop:"4px"}}></div>
-              <div>
-                <div style={{fontSize:"13px", fontWeight:"500", color:"#085041"}}>✓ {c.status}</div>
-                <div style={{fontSize:"11px", color:"#888"}}>{c.name}</div>
-              </div>
+              <div style={{fontSize:"13px", fontWeight:"500", color:"#085041"}}>✓ {c.status}</div>
             </div>
             <div style={{fontSize:"11px", color:"#888", textAlign:"right", lineHeight:"1.6"}}>
               {formatDate(c.createdAt, c.timezone)}
