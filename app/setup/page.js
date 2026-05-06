@@ -9,7 +9,6 @@ export default function Setup() {
   const router = useRouter();
   const [myName, setMyName] = useState("");
   const [parentName, setParentName] = useState("");
-  const [parentTimezone, setParentTimezone] = useState("Asia/Seoul");
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -28,7 +27,6 @@ export default function Setup() {
     await setDoc(doc(db, "users", user.uid), {
       myName,
       parentName,
-      parentTimezone,
       myTimezone,
       familyId,
       email: user.email,
@@ -48,26 +46,10 @@ export default function Setup() {
           <input type="text" value={myName} onChange={e => setMyName(e.target.value)} placeholder="e.g. David"
             style={{width:"100%", padding:"10px 12px", borderRadius:"8px", border:"1px solid #ddd", fontSize:"14px", boxSizing:"border-box"}} />
         </div>
-        <div style={{marginBottom:"16px"}}>
+        <div style={{marginBottom:"24px"}}>
           <label style={{fontSize:"12px", color:"#888", display:"block", marginBottom:"4px"}}>Your parent's name</label>
           <input type="text" value={parentName} onChange={e => setParentName(e.target.value)} placeholder="e.g. Mary"
             style={{width:"100%", padding:"10px 12px", borderRadius:"8px", border:"1px solid #ddd", fontSize:"14px", boxSizing:"border-box"}} />
-        </div>
-        <div style={{marginBottom:"24px"}}>
-          <label style={{fontSize:"12px", color:"#888", display:"block", marginBottom:"4px"}}>Your parent's timezone</label>
-          <select value={parentTimezone} onChange={e => setParentTimezone(e.target.value)}
-            style={{width:"100%", padding:"10px 12px", borderRadius:"8px", border:"1px solid #ddd", fontSize:"14px", boxSizing:"border-box", background:"#fff"}}>
-            <option value="Asia/Seoul">Korea (KST)</option>
-            <option value="Asia/Tokyo">Japan (JST)</option>
-            <option value="Asia/Shanghai">China (CST)</option>
-            <option value="Asia/Kolkata">India (IST)</option>
-            <option value="Europe/London">UK (GMT)</option>
-            <option value="Europe/Paris">Europe (CET)</option>
-            <option value="America/New_York">US East (ET)</option>
-            <option value="America/Chicago">US Central (CT)</option>
-            <option value="America/Denver">US Mountain (MT)</option>
-            <option value="America/Los_Angeles">US West (PT)</option>
-          </select>
         </div>
         <button onClick={handleSave} disabled={saving} style={{
           width:"100%", background:"#1D9E75", color:"#fff",
