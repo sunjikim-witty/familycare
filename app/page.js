@@ -53,7 +53,9 @@ export default function Home() {
     const parentTime = d.toLocaleString("en-US", {
       timeZone: parentTz, month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"
     });
-    return `${myTime} (${profile.myName}) · ${parentTime} (${profile.parentName})`;
+const myTzShort = new Date().toLocaleTimeString("en-US", {timeZone: myTz, timeZoneName:"short"}).split(" ").pop();
+const parentTzShort = new Date().toLocaleTimeString("en-US", {timeZone: parentTz, timeZoneName:"short"}).split(" ").pop();
+return `${myTime} ${myTzShort} (${profile.myName}) · ${parentTime} ${parentTzShort} (${profile.parentName})`;
   }
 
   return (
